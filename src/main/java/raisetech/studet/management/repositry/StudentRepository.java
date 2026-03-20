@@ -9,23 +9,43 @@ import java.util.List;
 // /**を入力してEnterを押すとコメントが残せる。クラス名やメソッド名にカーソルでコメントの情報が見れる。
 
 /**
- * 受講生情報を扱うリポジトリ
+ * 受講生テーブルと受講生コース情報と紐ずくRepositoryです。
  * 全件検索や単一条件の検索、コース情報の検索が行えるクラスです。
  */
 @Mapper
 public interface StudentRepository {
 
-    //WHERE is_deleted = falseを削除するとキャンセル人物は画面に表示される
-    @Select("SELECT * FROM students WHERE is_deleted = false")
+  /**
+   * 受講生の全件検索を行います。
+   *
+   * @return 受講生一覧（全件）
+   */
+  @Select("SELECT * FROM students WHERE is_deleted = false")
     List<Student> search();
 
+  /**
+   * 受講生の検索を行います。
+   *
+   * @param studentId　受講生ID
+   * @return 受講生
+   */
     @Select("SELECT * FROM students WHERE student_id = #{studentId}")
     Student searchStudent(String studentId);
 
-
-    @Select("SELECT * FROM students_courses")
+  /**
+   * 受講生のコース情報の全件検索を行います。
+   *
+   * @return 受講生のコース情報（全件）
+   */
+  @Select("SELECT * FROM students_courses")
     List<StudentsCourses> searchStudentCourseList();
 
+  /**
+   * 受講生IDに紐ずく受講生コース情報を検索します。。
+   *
+   * @param studentId 受講生ID
+   * @return 受講生IDに紐ずくコース情報
+   */
     @Select("SELECT * FROM students_courses WHERE student_id = #{studentId}")
     List<StudentsCourses> searchStudentCourse(String studentId);
 
