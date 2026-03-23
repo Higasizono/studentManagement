@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.studet.management.controller.converter.StudentConverter;
 import raisetech.studet.management.data.Student;
-import raisetech.studet.management.data.StudentsCourses;
+import raisetech.studet.management.data.StudentCourse;
 import raisetech.studet.management.domain.StudentDetail;
 import raisetech.studet.management.repositry.StudentRepository;
 
@@ -29,51 +29,74 @@ public class StudentService {
     }
 
   /**
-   * 受講生の一覧検索を行います。
-   * 全件検索を行うので、条件指定は行いません。
+   * 受講生詳細の一覧検索を行います。全件検索を行うので、条件指定は行いません。
    *
    * @return 受講生一覧（一覧）
    */
   public List<StudentDetail> searchStudentList() {
     List<Student> studentList = repository.search();
-    List<StudentsCourses> studentsCoursesList = repository.searchStudentCourseList();
-        return converter.convertStudentDetails(studentList, studentsCoursesList);
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
+        return converter.convertStudentDetails(studentList, studentCourseList);
     }
 
   /**
-   * 受講生検索です
-   * IDに紐づく受講生情報を取得した後、その受講生情報に紐ずく受講生コース情報を取得して設定します。
+   * 受講生詳細検索です。IDに紐づく受講生情報を取得した後、その受講生情報に紐ずく受講生コース情報を取得して設定します。
+   *
    * @param studentId 受講生ID
-   * @return 受講生
+   * @return 受講生詳細
    */
   public StudentDetail searchStudent(String studentId){
         Student student = repository.searchStudent(studentId);
-        List<StudentsCourses> studentsCourses = repository.searchStudentCourse(student.getStudentId());
-        return new StudentDetail(student,studentsCourses);
+        List<StudentCourse> studentCourse = repository.searchStudentCourse(student.getStudentId());
+        return new StudentDetail(student, studentCourse);
     }
 
-    public List<StudentsCourses> searchStudentCourseList() {
+    public List<StudentCourse> searchStudentCourseList() {
         return repository.searchStudentCourseList();
     }
 
+  /**
+   * 受講生詳細の登録を行います。
+   * 受講生と受講生コース情報を個別に登録し受講生コース情報には受講生情報を紐づける値とコース開始日とコース終了日を設定します。
+   *
+   * @param studentDetail 受講生詳細
+   * @return 登録情報を付与した受講生詳細
+   */
     @Transactional
     public StudentDetail registerStudent(StudentDetail studentDetail) {
-        repository.registerStudent(studentDetail.getStudent());
-        for (StudentsCourses studentsCourses : studentDetail.getStudentsCourses()) {
-            studentsCourses.setStudentId(studentDetail.getStudent().getStudentId());
-            studentsCourses.setCourseStartAt(LocalDateTime.now());
-            studentsCourses.setCourseEndAt(LocalDateTime.now().plusYears(1));
-            repository.registerStudentCourse(studentsCourses);
-        }
+      Student student = studentDetail.getStudent();
+
+      repository.registerStudent(student);
+      studentDetail.getStudentCourseList().forEach(studentCourses -> {
+        initStudentsCourse(studentCourses, student);
+        repository.registerStudentCourse(studentCourses);
+      });
         return studentDetail;
     }
 
-    @Transactional
+  /**
+   * 受講生コース情報を登録する際の初期情報を設定する。
+   *
+   * @param studentCourses 受講生コース情報
+   * @param student 受講生
+   */
+  private void initStudentsCourse(StudentCourse studentCourses, Student student) {
+    LocalDateTime now = LocalDateTime.now();
+
+    studentCourses.setStudentId(student.getStudentId());
+    studentCourses.setCourseStartAt(now);
+    studentCourses.setCourseEndAt(now.plusYears(1));
+  }
+
+  /**
+   * 受講生詳細の更新を行います。受講生と受講生コース情報をそれぞれ更新します。
+   *
+   * @param studentDetail 受講生詳細
+   */
+  @Transactional
     public void updateStudent(StudentDetail studentDetail) {
         repository.updateStudent(studentDetail.getStudent());
-        for (StudentsCourses studentsCourses : studentDetail.getStudentsCourses()) {
-            studentsCourses.setStudentId(studentDetail.getStudent().getStudentId());
-            repository.updateStudentCourse(studentsCourses);
-        }
+    studentDetail.getStudentCourseList()
+        .forEach(studentCourses -> repository.updateStudentCourse(studentCourses));
     }
 }
