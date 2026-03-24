@@ -7,7 +7,7 @@ import raisetech.studet.management.controller.converter.StudentConverter;
 import raisetech.studet.management.data.Student;
 import raisetech.studet.management.data.StudentCourse;
 import raisetech.studet.management.domain.StudentDetail;
-import raisetech.studet.management.repositry.StudentRepository;
+import raisetech.studet.management.repository.StudentRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
