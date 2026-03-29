@@ -1,6 +1,8 @@
 package raisetech.studet.management.controller;
 
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.studet.management.domain.StudentDetail;
+import raisetech.studet.management.exception.TestException;
 import raisetech.studet.management.service.StudentService;
 
 import java.util.List;
@@ -31,20 +34,14 @@ public class StudentController {
         this.service = service;
     }
 
-    //GET POST
-    //GETは取得する、リクエストを受け取る()
-    //POSTは情報を与える,渡す(新規登録、更新)
-
-    //全件取得
-
   /**
    * 受講生詳細の一覧検索です。全件検索を行うので、条件指定は行いません。
    *
    * @return 受講生詳細一覧（全件）
    */
     @GetMapping("/studentList")
-    public List<StudentDetail> getStudentList() {
-        return service.searchStudentList();
+    public List<StudentDetail> getStudentList() throws TestException {
+        throw new TestException("現在のこのAPIは使用できません。URLは「studentList」ではなく、「students」を利用してください。");
     }
 
   /**
@@ -54,7 +51,8 @@ public class StudentController {
    * @return 受講生
    */
   @GetMapping("/student/{studentId}")
-    public StudentDetail getStudent(@PathVariable @Size(min = 1,max = 3) String studentId){
+    public StudentDetail getStudent(@PathVariable @NotBlank
+  @Pattern(regexp = "^\\d+$") String studentId){
         return service.searchStudent(studentId);
     }
 
@@ -64,7 +62,8 @@ public class StudentController {
    * @return 実行結果
    */
   @PostMapping("/registerStudent")
-    public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail){
+    public ResponseEntity<StudentDetail> registerStudent
+  (@RequestBody @Valid StudentDetail studentDetail){
         StudentDetail responseStudentDetail =  service.registerStudent(studentDetail);
         return ResponseEntity.ok(responseStudentDetail);
     }
@@ -76,7 +75,7 @@ public class StudentController {
    * @return 実行結果
    */
   @PutMapping("/updateStudent")
-    public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail){
+    public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail){
         service.updateStudent(studentDetail);
         return ResponseEntity.ok("更新処理が成功しました。");
     }
