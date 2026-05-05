@@ -42,8 +42,8 @@ public class StudentController {
    */
     @Operation(summary = "一覧", description = "受講生の一覧検索します。")
     @GetMapping("/studentList")
-    public List<StudentDetail> getStudentList() throws TestException {
-        throw new TestException("現在のこのAPIは使用できません。URLは「studentList」ではなく、「students」を利用してください。");
+    public List<StudentDetail> getStudentList(){
+      return service.searchStudentList();
     }
 
   /**
@@ -92,4 +92,11 @@ public class StudentController {
         service.updateStudent(studentDetail);
         return ResponseEntity.ok("更新処理が成功しました。");
     }
+
+  @GetMapping("/exception")
+  public ResponseEntity<String> exception() {
+    return ResponseEntity
+        .badRequest()
+        .body("このAPIは現在利用できません。古いURLとなっております。");
+  }
 }
