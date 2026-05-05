@@ -16,8 +16,7 @@ import lombok.Setter;
 public class Student {
 
   @Schema(description = "ID", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
-  @NotBlank
-  @Pattern(regexp = "^\\d+$")
+  @Pattern(regexp = "^\\d+$",message = "数字のみ入力するようにして下さい。")
     private  String studentId;
 
   @Schema(description = "名前", example = "田中太郎")
